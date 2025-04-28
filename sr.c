@@ -135,6 +135,7 @@ void A_input(struct pkt packet)
         else {
             /* New ACK */
             timer_status[packet.acknum] = false;
+            timer_pkts[packet.acknum] = 0;
 
             /* Slide window if possible */
             while (windowcount > 0 && timer_status[buffer[windowfirst].seqnum] == false) {
