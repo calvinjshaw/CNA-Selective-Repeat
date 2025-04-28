@@ -26,12 +26,14 @@
 #define WINDOWSIZE 6    /* the maximum number of buffered unacked packet */
 #define SEQSPACE 7      /* the min sequence space for GBN must be at least windowsize + 1 */
 #define NOTINUSE (-1)   /* used to fill header fields that are not being used */
-
 /* generic procedure to compute the checksum of a packet.  Used by both sender and receiver  
    the simulator will overwrite part of your packet with 'z's.  It will not overwrite your 
    original checksum.  This procedure must generate a different checksum to the original if
    the packet is corrupted.
 */
+float timer_pkts[SEQSPACE];
+bool timer_status[SEQSPACE];
+
 int ComputeChecksum(struct pkt packet)
 {
   int checksum = 0;
