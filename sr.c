@@ -93,8 +93,14 @@ void A_output(struct msg message)
     tolayer3 (A, sendpkt);
 
     /* start timer if first packet in window */
-    if (windowcount == 1)
-      starttimer(A,RTT);
+    // if (windowcount == 1)
+    //   starttimer(A,RTT);
+    // Using new timer logic
+    timer_pkts[sendpkt.seqnum] = get_sim_time() + RTT;  // Set expiration time
+    timer_status[sendpkt.seqnum] = true;                // Mark timer active
+
+    starttimer(A, RTT / 2); // Make sure real timer keeps ticking for checking (use a smaller interval like RTT/2)
+
 
     /* get next sequence number, wrap back to 0 */
     A_nextseqnum = (A_nextseqnum + 1) % SEQSPACE;  
