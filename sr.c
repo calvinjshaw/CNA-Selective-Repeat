@@ -181,19 +181,22 @@ void A_input(struct pkt packet)
 /* called when A's timer goes off */
 void A_timerinterrupt(void)
 {
-  int i;
+  float now = get_sim_time();
 
   if (TRACE > 0)
     printf("----A: time out,resend packets!\n");
 
-  for(i=0; i<windowcount; i++) {
+  for (int i = 0; i < SEQSPACE; i++) {
 
-    if (TRACE > 0)
-      printf ("---A: resending packet %d\n", (buffer[(windowfirst+i) % WINDOWSIZE]).seqnum);
+    if (timer_status[i] && now >= timer_pkts[i]) {
+        if (TRACE > 0)
+            printf("---A: resending packet %d\n", i);  // KEEP THIS PRINT EXACTLY
 
-    tolayer3(A,buffer[(windowfirst+i) % WINDOWSIZE]);
-    packets_resent++;
-    if (i==0) starttimer(A,RTT);
+        tolayer3(A, buffer[i]); // resend the specific expired packet
+        packets_resent++;
+
+        timer_pkts[i] = now + RTT; // restart this packet's logical timer
+    }
   }
 }       
 
@@ -211,6 +214,11 @@ void A_init(void)
 		     so initially this is set to -1
 		   */
   windowcount = 0;
+  for (int i = 0; i < SEQSPACE; i++) {
+    timer_pkts[i] = 0;
+    timer_status[i] = false;
+}
+
 }
 
 
