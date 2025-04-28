@@ -70,7 +70,7 @@ void A_output(struct msg message)
 {
   struct pkt sendpkt;
   int i;
-  float now_time=time;
+  float now_time = time;
 
   /* if not blocked waiting on ACK */
   if ( windowcount < WINDOWSIZE) {
