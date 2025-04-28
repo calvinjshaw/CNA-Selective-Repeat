@@ -154,30 +154,34 @@ void A_input(struct pkt packet)
 /* called when A's timer goes off */
 void A_timerinterrupt(void)
 {
-  int i;
-  
-  if (TRACE > 0)
-    printf("----A: time out,resend packets!\n");
+    int i;
+    bool has_active_timer = false; /* new flag */
 
-  /* manually simulate timer countdown */
-  for (i = 0; i < SEQSPACE; i++) {
+    if (TRACE > 0)
+        printf("----A: time out,resend packets!\n");
+
+    for (i = 0; i < SEQSPACE; i++) {
         if (timer_status[i]) {
-            timer_pkts[i] -= (RTT / 2); /* subtract 8.0 units */
+            timer_pkts[i] -= (RTT / 2);
 
             if (timer_pkts[i] <= 0) {
-                /* timer expired, resend packet */
                 if (TRACE > 0)
                     printf("---A: resending packet %d\n", i);
-
+                
                 tolayer3(A, buffer[i]);
                 packets_resent++;
 
-                timer_pkts[i] = RTT; /* restart countdown */
+                timer_pkts[i] = RTT;
             }
+            has_active_timer = true; /* we still have something to wait for */
         }
-  }
-  starttimer(A, RTT / 2 );
-}       
+    }
+
+    if (has_active_timer) {
+        starttimer(A, RTT / 2); /* restart timer only if needed */
+    }
+}
+       
 
 
 
