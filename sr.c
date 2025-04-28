@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include "emulator.h"
 #include "gbn.h"
-extern float time;
+
 
 
 /* ******************************************************************
@@ -99,7 +99,7 @@ void A_output(struct msg message)
     /* if (windowcount == 1)*/
     /*   starttimer(A,RTT);*/
     /* Using new timer logic*/
-    timer_pkts[sendpkt.seqnum] = now_time + RTT;  /* Set expiration time*/
+    timer_pkts[sendpkt.seqnum] = RTT;  /* Set expiration time*/
     timer_status[sendpkt.seqnum] = true;                /* Mark timer active*/
 
     starttimer(A, RTT / 2); /* Make sure real timer keeps ticking for checking (use a smaller interval like RTT/2)*/
@@ -154,22 +154,26 @@ void A_input(struct pkt packet)
 void A_timerinterrupt(void)
 {
   int i;
-  float now = time;
   
   if (TRACE > 0)
     printf("----A: time out,resend packets!\n");
 
+  /* manually simulate timer countdown */
   for (i = 0; i < SEQSPACE; i++) {
+        if (timer_status[i]) {
+            timer_pkts[i] -= (RTT / 2); /* subtract 8.0 units */
 
-    if (timer_status[i] && now >= timer_pkts[i]) {
-        if (TRACE > 0)
-            printf("---A: resending packet %d\n", i);  /* KEEP THIS PRINT EXACTLY*/
+            if (timer_pkts[i] <= 0) {
+                /* timer expired, resend packet */
+                if (TRACE > 0)
+                    printf("---A: resending packet %d\n", i);
 
-        tolayer3(A, buffer[i]); /* resend the specific expired packet*/
-        packets_resent++;
+                tolayer3(A, buffer[i]);
+                packets_resent++;
 
-        timer_pkts[i] = now + RTT; /* restart this packet's logical timer*/
-    }
+                timer_pkts[i] = RTT; /* restart countdown */
+            }
+        }
   }
   starttimer(A, RTT / 2 );
 }       
