@@ -3,6 +3,8 @@
 #include <stdbool.h>
 #include "emulator.h"
 #include "gbn.h"
+extern float time;
+
 
 /* ******************************************************************
    Go Back N protocol.  Adapted from J.F.Kurose
@@ -119,33 +121,33 @@ void A_output(struct msg message)
 */
 void A_input(struct pkt packet)
 {
-  
+    if (!IsCorrupted(packet)) {
+        if (TRACE > 0)
+            printf("----A: uncorrupted ACK %d is received\n", packet.acknum);
+        total_ACKs_received++;
 
-  /* if received ACK is not corrupted */ 
-  if (!IsCorrupted(packet)) {
-    if (TRACE > 0)
-      printf("----A: uncorrupted ACK %d is received\n",packet.acknum);
-    total_ACKs_received++;
-    
-    timer_status[packet.acknum] = false;   // Stop logical timer for that packet
-    while (timer_status[buffer[windowfirst].seqnum] == false && windowcount > 0) {
-    windowfirst = (windowfirst + 1) % WINDOWSIZE;
-    windowcount--;
+        if (timer_status[packet.acknum] == false) {
+            /* Duplicate ACK */
+            if (TRACE > 0)
+                printf("----A: duplicate ACK received, do nothing!\n");
+        }
+        else {
+            /* New ACK */
+            timer_status[packet.acknum] = false;
+
+            /* Slide window if possible */
+            while (windowcount > 0 && timer_status[buffer[windowfirst].seqnum] == false) {
+                windowfirst = (windowfirst + 1) % WINDOWSIZE;
+                windowcount--;
+            }
+        }
+    }
+    else {
+        if (TRACE > 0)
+            printf("----A: corrupted ACK is received, do nothing!\n");
+    }
 }
 
-    
-
-    /* check if new ACK or duplicate */
-    
-    
-        else
-          if (TRACE > 0)
-        printf ("----A: duplicate ACK received, do nothing!\n")
-  }
-  else 
-    if (TRACE > 0)
-      printf ("----A: corrupted ACK is received, do nothing!\n");
-}
 
 /* called when A's timer goes off */
 void A_timerinterrupt(void)
