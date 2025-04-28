@@ -23,7 +23,7 @@ extern float time;
    - fixed C style to adhere to current programming style
    - added GBN implementation
 **********************************************************************/
-
+#define simtime time
 #define RTT  16.0       /* round trip time.  MUST BE SET TO 16.0 when submitting assignment */
 #define WINDOWSIZE 6    /* the maximum number of buffered unacked packet */
 #define SEQSPACE 7      /* the min sequence space for GBN must be at least windowsize + 1 */
@@ -98,10 +98,10 @@ void A_output(struct msg message)
     /* if (windowcount == 1)*/
     /*   starttimer(A,RTT);*/
     /* Using new timer logic*/
-    timer_pkts[sendpkt.seqnum] = time + RTT;  // Set expiration time
-    timer_status[sendpkt.seqnum] = true;                // Mark timer active
+    timer_pkts[sendpkt.seqnum] = simtime + RTT;  /* Set expiration time*/
+    timer_status[sendpkt.seqnum] = true;                /* Mark timer active*/
 
-    starttimer(A, RTT / 2); // Make sure real timer keeps ticking for checking (use a smaller interval like RTT/2)
+    starttimer(A, RTT / 2); /* Make sure real timer keeps ticking for checking (use a smaller interval like RTT/2)*/
 
 
     /* get next sequence number, wrap back to 0 */
@@ -152,8 +152,9 @@ void A_input(struct pkt packet)
 /* called when A's timer goes off */
 void A_timerinterrupt(void)
 {
-  float now = time;
   int i;
+  float now = simtime;
+  
   if (TRACE > 0)
     printf("----A: time out,resend packets!\n");
 
@@ -161,12 +162,12 @@ void A_timerinterrupt(void)
 
     if (timer_status[i] && now >= timer_pkts[i]) {
         if (TRACE > 0)
-            printf("---A: resending packet %d\n", i);  // KEEP THIS PRINT EXACTLY
+            printf("---A: resending packet %d\n", i);  /* KEEP THIS PRINT EXACTLY*/
 
-        tolayer3(A, buffer[i]); // resend the specific expired packet
+        tolayer3(A, buffer[i]); /* resend the specific expired packet*/
         packets_resent++;
 
-        timer_pkts[i] = now + RTT; // restart this packet's logical timer
+        timer_pkts[i] = now + RTT; /* restart this packet's logical timer*/
     }
   }
 }       
@@ -177,6 +178,7 @@ void A_timerinterrupt(void)
 /* entity A routines are called. You can use it to do any initialization */
 void A_init(void)
 {
+  int i;
   /* initialise A's window, buffer and sequence number */
   A_nextseqnum = 0;  /* A starts with seq num 0, do not change this */
   windowfirst = 0;
@@ -185,7 +187,7 @@ void A_init(void)
 		     so initially this is set to -1
 		   */
   windowcount = 0;
-  int i;
+  
   for (i = 0; i < SEQSPACE; i++) {
     timer_pkts[i] = 0;
     timer_status[i] = false;
