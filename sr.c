@@ -171,7 +171,7 @@ void A_timerinterrupt(void)
         timer_pkts[i] = now + RTT; /* restart this packet's logical timer*/
     }
   }
-  starttimer(A, RTT / 2 )
+  starttimer(A, RTT / 2 );
 }       
 
 
