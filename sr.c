@@ -23,7 +23,7 @@ extern float time;
    - fixed C style to adhere to current programming style
    - added GBN implementation
 **********************************************************************/
-#define simtime time
+
 #define RTT  16.0       /* round trip time.  MUST BE SET TO 16.0 when submitting assignment */
 #define WINDOWSIZE 6    /* the maximum number of buffered unacked packet */
 #define SEQSPACE 7      /* the min sequence space for GBN must be at least windowsize + 1 */
@@ -70,6 +70,7 @@ void A_output(struct msg message)
 {
   struct pkt sendpkt;
   int i;
+  float now_time=time;
 
   /* if not blocked waiting on ACK */
   if ( windowcount < WINDOWSIZE) {
@@ -98,7 +99,7 @@ void A_output(struct msg message)
     /* if (windowcount == 1)*/
     /*   starttimer(A,RTT);*/
     /* Using new timer logic*/
-    timer_pkts[sendpkt.seqnum] = simtime + RTT;  /* Set expiration time*/
+    timer_pkts[sendpkt.seqnum] = now_time + RTT;  /* Set expiration time*/
     timer_status[sendpkt.seqnum] = true;                /* Mark timer active*/
 
     starttimer(A, RTT / 2); /* Make sure real timer keeps ticking for checking (use a smaller interval like RTT/2)*/
@@ -153,7 +154,7 @@ void A_input(struct pkt packet)
 void A_timerinterrupt(void)
 {
   int i;
-  float now = simtime;
+  float now = time;
   
   if (TRACE > 0)
     printf("----A: time out,resend packets!\n");
@@ -170,7 +171,7 @@ void A_timerinterrupt(void)
         timer_pkts[i] = now + RTT; /* restart this packet's logical timer*/
     }
   }
-  starttimer(A, RTT / 2 );
+  starttimer(A, RTT / 2 )
 }       
 
 
