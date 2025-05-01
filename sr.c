@@ -108,8 +108,7 @@ void A_output(struct msg message)
     /* if (windowcount == 1)*/
     /*   starttimer(A,RTT);*/
     /* Using new timer logic*/
-    timer_pkts[sendpkt.seqnum] = RTT;  /* Set expiration time*/
-    timer_status[sendpkt.seqnum] = true;                /* Mark timer active*/
+    
 
     starttimer(A, RTT / 2); /* Make sure real timer keeps ticking for checking (use a smaller interval like RTT/2)*/
 
@@ -207,11 +206,10 @@ void A_init(void)
 		     so initially this is set to -1
 		   */
   windowcount = 0;
-  
-  for (i = 0; i < SEQSPACE; i++) {
-    timer_pkts[i] = 0;
-    timer_status[i] = false;
-}
+  timer_packet = -1;
+  for (i = 0; i < SEQSPACE; i++){
+    acked[i] = false;
+  }
 
 }
 
