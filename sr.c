@@ -128,44 +128,49 @@ void A_output(struct msg message)
 */
 void A_input(struct pkt packet)
 {
-  if (!IsCorrupted(packet)) {
-    if (TRACE > 0){
-        printf("----A: uncorrupted ACK %d is received\n", packet.acknum);
-        
-    }
-    new_ACKs++;
-
-    if (acked[packet.acknum]) {
-        if (TRACE > 0)
-            printf("----A: duplicate ACK received, do nothing!\n");
-    } else {
-        acked[packet.acknum] = true;
-
-        /* Slide window */
-        while (windowcount > 0 && acked[buffer[windowfirst].seqnum]) {
-            windowfirst = (windowfirst + 1) % WINDOWSIZE;
-            windowcount--;
+    if (!IsCorrupted(packet)) {
+        if (TRACE > 0) {
+            printf("----A: uncorrupted ACK %d is received\n", packet.acknum);
         }
 
-        if (packet.acknum == timer_packet) {
-            stoptimer(A);
+        new_ACKs++;
 
-            /* Start timer for new oldest unACKed packet, if any */
-            if (windowcount > 0) {
-                timer_packet = buffer[windowfirst].seqnum;
-                starttimer(A, RTT);
-            } else {
-                timer_packet = -1;
+        if (acked[packet.acknum]) {
+            if (TRACE > 0) {
+                printf("----A: duplicate ACK received, do nothing!\n");
+            }
+        } else {
+            if (TRACE > 0) {
+                printf("----A: ACK %d is not a duplicate\n", packet.acknum);
+            }
+
+            acked[packet.acknum] = true;
+
+            /* Slide window */
+            while (windowcount > 0 && acked[buffer[windowfirst].seqnum]) {
+                windowfirst = (windowfirst + 1) % WINDOWSIZE;
+                windowcount--;
+            }
+
+            if (packet.acknum == timer_packet) {
+                stoptimer(A);
+
+                /* Start timer for new oldest unACKed packet, if any */
+                if (windowcount > 0) {
+                    timer_packet = buffer[windowfirst].seqnum;
+                    starttimer(A, RTT);
+                } else {
+                    timer_packet = -1;
+                }
             }
         }
+    } else {
+        if (TRACE == 1) {
+            printf("----A: corrupted ACK is received, do nothing!\n");
+        }
     }
-  } 
-  else {
-    if (TRACE == 1)
-        printf("----A: corrupted ACK is received, do nothing!\n");
-    }
-
 }
+
 
 
 /* called when A's timer goes off */
