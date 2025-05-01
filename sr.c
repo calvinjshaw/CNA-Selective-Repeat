@@ -6,6 +6,7 @@
 
 
 
+
 /* ******************************************************************
    Go Back N protocol.  Adapted from J.F.Kurose
    ALTERNATING BIT AND GO-BACK-N NETWORK EMULATOR: VERSION 1.2  
@@ -64,6 +65,8 @@ static struct pkt buffer[WINDOWSIZE];  /* array for storing packets waiting for 
 static int windowfirst, windowlast;    /* array indexes of the first/last packet awaiting ACK */
 static int windowcount;                /* the number of packets currently awaiting an ACK */
 static int A_nextseqnum;               /* the next sequence number to be used by the sender */
+static int timer_packet = -1;        /* The seqnum of the packet currently being timed */
+static bool acked[SEQSPACE];         /* Track which packets are ACKed */
 
 /* called from layer 5 (application layer), passed the message to be sent to other side */
 void A_output(struct msg message)
@@ -88,12 +91,18 @@ void A_output(struct msg message)
     /* windowlast will always be 0 for alternating bit; but not for GoBackN */
     windowlast = (windowlast + 1) % WINDOWSIZE; 
     buffer[windowlast] = sendpkt;
-    windowcount++;
+    acked[sendpkt.seqnum] = false;
 
     /* send out packet */
     if (TRACE > 0)
       printf("Sending packet %d to layer 3\n", sendpkt.seqnum);
     tolayer3 (A, sendpkt);
+
+    /* If this is the first unACKed packet, start the timer */
+    if (timer_packet == -1) {
+      starttimer(A, RTT);
+      timer_packet = sendpkt.seqnum;
+  }
 
     /* start timer if first packet in window */
     /* if (windowcount == 1)*/
