@@ -131,8 +131,9 @@ void A_input(struct pkt packet)
   if (!IsCorrupted(packet)) {
     if (TRACE > 0){
         printf("----A: uncorrupted ACK %d is received\n", packet.acknum);
-        total_ACKs_received++;
+        
     }
+    total_ACKs_received++;
 
     if (acked[packet.acknum]) {
         if (TRACE > 0)
@@ -176,9 +177,9 @@ void A_timerinterrupt(void)
         printf("----A: time out,resend packets!\n");
     
         if (timer_packet != -1) {
-          if (TRACE > 0)
+          if (TRACE > 0){
               printf("---A: resending packet %d\n", timer_packet);
-  
+          }
           tolayer3(A, buffer[timer_packet]);
           packets_resent++;
   
@@ -230,8 +231,11 @@ void B_input(struct pkt packet)
     if (!IsCorrupted(packet)) {
         if (TRACE > 0){
             printf("----B: packet %d is correctly received, send ACK!\n", packet.seqnum);
-            tolayer5(B, packet.payload);
+            
         }
+        
+        tolayer5(B, packet.payload);
+
 
         /* If packet not received before, store it */
         if (!received[packet.seqnum]) {
