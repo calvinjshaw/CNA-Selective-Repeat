@@ -175,26 +175,16 @@ void A_timerinterrupt(void)
     if (TRACE > 0)
         printf("----A: time out,resend packets!\n");
 
-    for (i = 0; i < SEQSPACE; i++) {
-        if (timer_status[i]) {
-            timer_pkts[i] -= (RTT / 2);
+        if (timer_packet != -1) {
+          if (TRACE > 0)
+              printf("---A: resending packet %d\n", timer_packet);
+  
+          tolayer3(A, buffer[timer_packet]);
+          packets_resent++;
+  
+          starttimer(A, RTT);  // restart the timer for same packet
+      }
 
-            if (timer_pkts[i] <= 0) {
-                if (TRACE > 0)
-                    printf("---A: resending packet %d\n", i);
-                
-                tolayer3(A, buffer[i]);
-                packets_resent++;
-
-                timer_pkts[i] = RTT;
-            }
-            has_active_timer = true; /* we still have something to wait for */
-        }
-    }
-
-    if (has_active_timer) {
-        starttimer(A, RTT / 2); /* restart timer only if needed */
-    }
 }
        
 
