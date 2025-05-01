@@ -219,7 +219,7 @@ void A_init(void)
 static int expectedseqnum; /* the sequence number expected next by the receiver */
 static int B_nextseqnum;   /* the sequence number for the next packets sent by B */
 static bool received[SEQSPACE];    /* Marks which packets have been received */
-static struct pkt recv_buffer[SEQSPACE]; /* Stores received packets */
+/*static struct pkt recv_buffer[SEQSPACE]; Stores received packets */
 
 
 /* called from layer 3, when a packet arrives for layer 4 at B*/
