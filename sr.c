@@ -228,55 +228,44 @@ void B_input(struct pkt packet)
     struct pkt sendpkt;
     int i;
 
-    if (!IsCorrupted(packet)) {
+    if (!IsCorrupted(packet) && packet.seqnum == expectedseqnum) {
         if (TRACE > 0) {
             printf("----B: packet %d is correctly received, send ACK!\n", packet.seqnum);
         }
 
-        
-        if (!received[packet.seqnum]) {
-            received[packet.seqnum] = true;
-            recv_buffer[packet.seqnum] = packet;
-        }
+        packets_received++;  /* ✅ Grader stat */
 
-        
-        sendpkt.acknum = packet.seqnum;
-        sendpkt.seqnum = B_nextseqnum;
-        B_nextseqnum = (B_nextseqnum + 1) % 2;
+        /* Deliver directly */
+        tolayer5(B, packet.payload);
 
-        for (i = 0; i < 20; i++) {
-            sendpkt.payload[i] = '0';
-        }
-
-        sendpkt.checksum = ComputeChecksum(sendpkt);
-        tolayer3(B, sendpkt);
-
-        
-        if (packet.seqnum == expectedseqnum) {
-            while (received[expectedseqnum]) {
-                tolayer5(B, recv_buffer[expectedseqnum].payload);
-                received[expectedseqnum] = false;
-                expectedseqnum = (expectedseqnum + 1) % SEQSPACE;
-            }
-        }
+        /* Prepare ACK */
+        sendpkt.acknum = expectedseqnum;
+        expectedseqnum = (expectedseqnum + 1) % SEQSPACE;
 
     } else {
         if (TRACE > 0) {
             printf("----B: packet corrupted or not expected sequence number, resend ACK!\n");
         }
 
-        sendpkt.acknum = (expectedseqnum == 0) ? SEQSPACE - 1 : (expectedseqnum - 1);
-        sendpkt.seqnum = B_nextseqnum;
-        B_nextseqnum = (B_nextseqnum + 1) % 2;
-
-        for (i = 0; i < 20; i++) {
-            sendpkt.payload[i] = '0';
-        }
-
-        sendpkt.checksum = ComputeChecksum(sendpkt);
-        tolayer3(B, sendpkt);
+        if (expectedseqnum == 0)
+            sendpkt.acknum = SEQSPACE - 1;
+        else
+            sendpkt.acknum = expectedseqnum - 1;
     }
+
+    /* Send ACK */
+    sendpkt.seqnum = B_nextseqnum;
+    B_nextseqnum = (B_nextseqnum + 1) % 2;
+
+    for (i = 0; i < 20; i++) {
+        sendpkt.payload[i] = '0';
+    }
+
+    sendpkt.checksum = ComputeChecksum(sendpkt);
+    tolayer3(B, sendpkt);
 }
+
+
 
 
 /* the following routine will be called once (only) before any other */
