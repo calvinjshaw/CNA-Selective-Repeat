@@ -182,7 +182,7 @@ void A_timerinterrupt(void)
           tolayer3(A, buffer[timer_packet]);
           packets_resent++;
   
-          starttimer(A, RTT);  // restart the timer for same packet
+          starttimer(A, RTT);  
       }
 
 }
@@ -229,6 +229,7 @@ void B_input(struct pkt packet)
     if (!IsCorrupted(packet)) {
         if (TRACE > 0)
             printf("----B: packet %d is correctly received, send ACK!\n", packet.seqnum);
+        tolayer5(B, packet.payload);
 
         /* If packet not received before, store it */
         if (!received[packet.seqnum]) {
