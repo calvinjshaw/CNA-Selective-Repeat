@@ -108,7 +108,7 @@ void A_output(struct msg message)
     /* start timer if first packet in window */
     /* if (windowcount == 1)*/
     /*   starttimer(A,RTT);*/
-    /* Using new timer logic*/
+    /* Using new timer 1logic*/
     
 
     
