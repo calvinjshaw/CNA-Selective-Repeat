@@ -130,6 +130,7 @@ void A_output(struct msg message)
 */
 void A_input(struct pkt packet)
 {
+    int i;
     if (!IsCorrupted(packet)) {
         if (TRACE > 0) {
             printf("----A: uncorrupted ACK %d is received\n", packet.acknum);
@@ -160,7 +161,7 @@ void A_input(struct pkt packet)
                 timer_packet = -1;
 
                 /* Find next unACKed packet in the window */
-                int i;
+                
                 for (i = 0; i < windowcount; i++) {
                     int index = (windowfirst + i) % WINDOWSIZE;
                     if (!acked[buffer[index].seqnum]) {
