@@ -160,7 +160,8 @@ void A_input(struct pkt packet)
                 timer_packet = -1;
 
                 /* Find next unACKed packet in the window */
-                for (int i = 0; i < windowcount; i++) {
+                int i;
+                for (i = 0; i < windowcount; i++) {
                     int index = (windowfirst + i) % WINDOWSIZE;
                     if (!acked[buffer[index].seqnum]) {
                         timer_packet = buffer[index].seqnum;
