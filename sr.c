@@ -99,6 +99,8 @@ void A_output(struct msg message)
     }
     tolayer3 (A, sendpkt);
 
+    windowcount++;
+
     /* If this is the first unACKed packet, start the timer */
     if (timer_packet == -1) {
       starttimer(A, RTT);
