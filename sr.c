@@ -266,7 +266,7 @@ void B_input(struct pkt packet)
     bool in_window;
 
     if (IsCorrupted(packet)) {
-        if (TRACE > 0) {
+        if (TRACE == 1) {
             printf("----B: packet corrupted or not expected sequence number, resend ACK!\n");
         }
         return;
