@@ -262,7 +262,7 @@ void B_input(struct pkt packet)
     struct pkt ackpkt;
     int seq = packet.seqnum;
     int i;
-    int upper_window;
+    
     bool in_window;
 
     if (IsCorrupted(packet)) {
