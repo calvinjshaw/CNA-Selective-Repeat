@@ -176,7 +176,7 @@ void A_input(struct pkt packet)
             }
         }
     } else {
-        if (TRACE == 1) {
+        if (TRACE > 0) {
             printf("----A: corrupted ACK is received, do nothing!\n");
         }
     }
