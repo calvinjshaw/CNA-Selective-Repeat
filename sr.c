@@ -273,7 +273,7 @@ void B_input(struct pkt packet)
     }
 
     packets_received++;
-    upper_window = (expectedseqnum + WINDOWSIZE) % SEQSPACE;
+    
     in_window = InWindow(seq, expectedseqnum, WINDOWSIZE);
 
 
